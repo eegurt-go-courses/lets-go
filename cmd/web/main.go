@@ -1,14 +1,14 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"snippetbox.eegurt.net/internal/models"
 )
 
@@ -19,9 +19,11 @@ type application struct {
 	templateCache map[string]*template.Template
 }
 
+var ctx = context.Background()
+
 func main() {
 	addr := flag.String("addr", "localhost:4000", "HTTP network address")
-	dsn := flag.String("dsn", "postgresql://postgres:12345@localhost:5432/snippetbox", "Postgres data source name")
+	dsn := flag.String("dsn", "postgresql://web:pass@localhost:5432/snippetbox", "Postgres data source name")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime)
@@ -56,12 +58,12 @@ func main() {
 	errorLog.Fatal(err)
 }
 
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("pgx", dsn)
+func openDB(dsn string) (*pgxpool.Pool, error) {
+	db, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil {
+	if err = db.Ping(ctx); err != nil {
 		return nil, err
 	}
 	return db, err
