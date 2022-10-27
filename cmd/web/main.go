@@ -19,8 +19,6 @@ type application struct {
 	templateCache map[string]*template.Template
 }
 
-var ctx = context.Background()
-
 func main() {
 	addr := flag.String("addr", "localhost:4000", "HTTP network address")
 	dsn := flag.String("dsn", "postgresql://web:pass@localhost:5432/snippetbox", "Postgres data source name")
@@ -59,11 +57,11 @@ func main() {
 }
 
 func openDB(dsn string) (*pgxpool.Pool, error) {
-	db, err := pgxpool.New(ctx, dsn)
+	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(ctx); err != nil {
+	if err = db.Ping(context.Background()); err != nil {
 		return nil, err
 	}
 	return db, err

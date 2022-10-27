@@ -15,7 +15,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippets, err := app.snippets.Latest()
+	snippets, err := app.snippets.Latest(r.Context())
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -34,7 +34,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippet, err := app.snippets.Get(id)
+	snippet, err := app.snippets.Get(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			app.notFound(w)
@@ -61,7 +61,7 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
 	expires := 7
 
-	id, err := app.snippets.Insert(title, content, expires)
+	id, err := app.snippets.Insert(r.Context(), title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
 		return

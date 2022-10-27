@@ -21,9 +21,7 @@ type SnippetModel struct {
 	DB *pgxpool.Pool
 }
 
-var ctx = context.Background()
-
-func (m *SnippetModel) Insert(title string, content string, expires int) (int, error) {
+func (m *SnippetModel) Insert(ctx context.Context, title string, content string, expires int) (int, error) {
 	query := `INSERT INTO snippets (title, content, created, expires)
 	VALUES($1, $2, NOW(), NOW() + INTERVAL '1 DAY' * $3)
 	RETURNING id`
@@ -37,7 +35,7 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (int, e
 	return id, nil
 }
 
-func (m *SnippetModel) Get(id int) (*Snippet, error) {
+func (m *SnippetModel) Get(ctx context.Context, id int) (*Snippet, error) {
 	query := `SELECT id, title, content, created, expires FROM snippets
 	WHERE expires > NOW() and id = $1`
 	row := m.DB.QueryRow(ctx, query, id)
@@ -55,7 +53,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 	return s, nil
 }
 
-func (m *SnippetModel) Latest() ([]*Snippet, error) {
+func (m *SnippetModel) Latest(ctx context.Context) ([]*Snippet, error) {
 	query := `SELECT id, title, content, created, expires FROM snippets
 	WHERE expires > NOW() 
 	ORDER BY id DESC LIMIT 10`
