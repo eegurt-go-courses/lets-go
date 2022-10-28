@@ -22,14 +22,15 @@ type SnippetModel struct {
 }
 
 func (m *SnippetModel) Insert(ctx context.Context, title string, content string, expires int) (int, error) {
+	var id int
+
 	query := `INSERT INTO snippets (title, content, created, expires)
 	VALUES($1, $2, NOW(), NOW() + INTERVAL '1 DAY' * $3)
 	RETURNING id`
-	row := m.DB.QueryRow(ctx, query, title, content, expires)
 
-	var id int
-	if err := row.Scan(&id); err != nil {
-		return 0, nil
+	err := m.DB.QueryRow(ctx, query, title, content, expires).Scan(&id)
+	if err != nil {
+		return 0, err
 	}
 
 	return id, nil
