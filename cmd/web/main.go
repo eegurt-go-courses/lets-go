@@ -76,8 +76,10 @@ func openDB(dsn string) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Deleted db.Ping() (pgx/v5)
+	err = db.Ping(context.Background())
+	if err != nil {
+		return nil, err
+	}
 
 	return db, err
 }
