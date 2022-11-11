@@ -73,6 +73,11 @@ func (m *UserModel) Authenticate(ctx context.Context, email, password string) (i
 	return id, nil
 }
 
-func (m *UserModel) Exists(id int) (bool, error) {
-	return false, nil
+func (m *UserModel) Exists(ctx context.Context, id int) (bool, error) {
+	var exists bool
+
+	query := "SELECT EXISTS(SELECT true FROM users WHERE id = $1)"
+
+	err := m.DB.QueryRow(ctx, query, id).Scan(&exists)
+	return exists, err
 }
